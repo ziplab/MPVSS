@@ -1,0 +1,19 @@
+_BASE_: MPVSS-VSPW.yaml
+MODEL:
+  BACKBONE:
+    NAME: "D2SwinTransformer"
+  WEIGHTS: "pretrained/vspw_model_final_swin_large.pth"   # modify for different model
+  SWIN:
+    EMBED_DIM: 192
+    DEPTHS: [2, 2, 18, 2]
+    NUM_HEADS: [6, 12, 24, 48]
+    WINDOW_SIZE: 12
+    APE: False
+    DROP_PATH_RATE: 0.3
+    PATCH_NORM: True
+    PRETRAIN_IMG_SIZE: 384
+  MASK_FORMER:
+    NUM_OBJECT_QUERIES: 100
+  MOTION:
+    OUT_CHANNELS: [192, 384, 768, 1536]
+OUTPUT_DIR: ../experiments/Mask2former/vspw/swin_large_dff

@@ -1,0 +1,12 @@
+_BASE_: MPVSS-VSPW.yaml
+MODEL:
+  WEIGHTS: "pretrained/vspw_r101_model_final.pth"
+  RESNETS:
+    DEPTH: 101
+    STEM_TYPE: "basic"  # not used
+    STEM_OUT_CHANNELS: 64
+    STRIDE_IN_1X1: False
+    OUT_FEATURES: ["res2", "res3", "res4", "res5"]
+    NORM: "SyncBN" # 
+    RES5_MULTI_GRID: [1, 1, 1]  # not used
+OUTPUT_DIR: ../experiments/Mask2former/vspw/r101_dff

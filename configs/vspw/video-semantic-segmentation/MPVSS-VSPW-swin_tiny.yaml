@@ -1,0 +1,16 @@
+_BASE_: MPVSS-VSPW.yaml
+MODEL:
+  BACKBONE:
+    NAME: "D2SwinTransformer"
+  WEIGHTS: "pretrained/vspw_model_final_swin_tiny.pth"   # modify for different model
+  SWIN:
+    EMBED_DIM: 96
+    DEPTHS: [2, 2, 6, 2]
+    NUM_HEADS: [3, 6, 12, 24]
+    WINDOW_SIZE: 7
+    APE: False
+    DROP_PATH_RATE: 0.3
+    PATCH_NORM: True
+  MOTION:
+    OUT_CHANNELS: [96, 192, 384, 768]
+OUTPUT_DIR: ../experiments/Mask2former/vspw/swin_tiny_dff

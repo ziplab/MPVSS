@@ -1,0 +1,111 @@
+MODEL:
+  META_ARCHITECTURE: "MPVSS"
+  MASK_FORMER:
+    TRANSFORMER_DECODER_NAME: "MPVSSTransformerDecoder"
+    TRANSFORMER_IN_FEATURE: "multi_scale_pixel_decoder"
+    DEEP_SUPERVISION: True
+    NO_OBJECT_WEIGHT: 0.1
+    CLASS_WEIGHT: 2.0
+    MASK_WEIGHT: 5.0
+    DICE_WEIGHT: 5.0
+    HIDDEN_DIM: 256
+    NUM_OBJECT_QUERIES: 100
+    NHEADS: 8
+    DROPOUT: 0.0
+    DIM_FEEDFORWARD: 2048
+    ENC_LAYERS: 0
+    PRE_NORM: False
+    ENFORCE_INPUT_PROJ: False
+    SIZE_DIVISIBILITY: 32
+    DEC_LAYERS: 10  # 9 decoder layers, add one for the loss on learnable query
+    TRAIN_NUM_POINTS: 12544
+    OVERSAMPLE_RATIO: 3.0
+    IMPORTANCE_SAMPLE_RATIO: 0.75
+    TEST:
+      SEMANTIC_ON: True
+      INSTANCE_ON: False
+      PANOPTIC_ON: False
+      OVERLAP_THRESHOLD: 0.8
+      OBJECT_MASK_THRESHOLD: 0.8
+  SEM_SEG_HEAD:
+    NAME: "MPVSSHead"
+    IGNORE_VALUE: 255
+    NUM_CLASSES: 124
+    LOSS_WEIGHT: 1.0
+    CONVS_DIM: 256
+    MASK_DIM: 256
+    NORM: "GN"
+    # pixel decoder
+    PIXEL_DECODER_NAME: "MSDeformAttnPixelDecoder"
+    IN_FEATURES: ["res2", "res3", "res4", "res5"]
+    DEFORMABLE_TRANSFORMER_ENCODER_IN_FEATURES: ["res3", "res4", "res5"]
+    COMMON_STRIDE: 4
+    TRANSFORMER_ENC_LAYERS: 6
+  MOTION:
+    NAME: "FlowEstimator"
+    ENCODER_NAME: "MotionEnc"
+    DECODER_NAME: "MotionDec"
+  BACKBONE:    
+    FREEZE_AT: 0
+    NAME: "build_resnet_backbone"
+  RESNETS:
+    DEPTH: 50
+    STEM_TYPE: "basic"  # not used
+    STEM_OUT_CHANNELS: 64
+    STRIDE_IN_1X1: False
+    OUT_FEATURES: ["res2", "res3", "res4", "res5"]
+    NORM: "SyncBN"  # use syncbn for cityscapes dataset
+    RES5_MULTI_GRID: [1, 1, 1]  # not used
+  PIXEL_MEAN: [123.675, 116.280, 103.530]
+  PIXEL_STD: [58.395, 57.120, 57.375]
+DATASETS:
+  TRAIN: ("vspw_sem_seg_video_train",)
+  TEST: ("vspw_sem_seg_video_val",)
+SOLVER:
+  IMS_PER_BATCH: 16
+  BASE_LR: 0.00005
+  MAX_ITER: 90000
+  WARMUP_FACTOR: 1.0
+  WARMUP_ITERS: 0
+  WEIGHT_DECAY: 0.05
+  OPTIMIZER: "ADAMW"
+  LR_SCHEDULER_NAME: "WarmupPolyLR"
+  BACKBONE_MULTIPLIER: 0.1
+  CLIP_GRADIENTS:
+    ENABLED: True
+    CLIP_TYPE: "full_model"
+    CLIP_VALUE: 0.01
+    NORM_TYPE: 2.0
+  AMP:
+    ENABLED: True
+INPUT:
+  MIN_SIZE_TRAIN: !!python/object/apply:eval ["[int(x * 0.1 * 960) for x in range(5, 21)]"]
+  MIN_SIZE_TRAIN_SAMPLING: "choice"
+  MIN_SIZE_TEST: 480
+  MAX_SIZE_TRAIN: 960
+  MAX_SIZE_TEST: 853
+  CROP:
+    ENABLED: True
+    TYPE: "absolute"
+    SIZE: (480, 480)
+    SINGLE_CATEGORY_MAX_AREA: 1.0
+  COLOR_AUG_SSD: True
+  RANDOM_FLIP: "flip_by_clip"
+  SAMPLING_FRAME_NUM: 1
+  TRAIN_SAMPLING_FRAME_RANGE: 10
+  TEST_SAMPLING_FRAME_RANGE: 5
+  SIZE_DIVISIBILITY: -1
+  FORMAT: "RGB"
+  DATASET_MAPPER_NAME: "mask_former_vspw_video_semantic"
+TEST:
+  EVAL_PERIOD: 5000
+  AUG:
+    ENABLED: False
+    MIN_SIZES: [240, 360, 480, 600, 720, 840] 
+    MAX_SIZE: 960
+    FLIP: True
+DATALOADER:
+  FILTER_EMPTY_ANNOTATIONS: True
+  NUM_WORKERS: 2
+VERSION: 2
+OUTPUT_DIR: ./experiments/mpvss/vspw/r50

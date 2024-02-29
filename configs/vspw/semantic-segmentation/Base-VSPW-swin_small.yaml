@@ -1,0 +1,14 @@
+_BASE_: Base-VSPW-R50.yaml
+MODEL:
+  BACKBONE:
+    NAME: "D2SwinTransformer"
+  WEIGHTS: "pretrained/swin_tiny_patch4_window7_224.pkl"   # modify for different model
+  SWIN:
+    EMBED_DIM: 96
+    DEPTHS: [2, 2, 18, 2]
+    NUM_HEADS: [3, 6, 12, 24]
+    WINDOW_SIZE: 7
+    APE: False
+    DROP_PATH_RATE: 0.3
+    PATCH_NORM: True
+OUTPUT_DIR: ../experiments/Mask2former/cityscapes/swin_small
